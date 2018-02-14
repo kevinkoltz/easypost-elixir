@@ -1,5 +1,4 @@
 defmodule Easypost.Address do
-  alias Easypost.Helpers
   alias Easypost.Requester
 
   defstruct [
@@ -33,22 +32,45 @@ defmodule Easypost.Address do
     company: String.t,
     phone: String.t,
     email: String.t,
-    residential: boolean,
+    residential: boolean(),
     created_at: String.t,
     updated_at: String.t
   }
 
-  @spec create_address(map, map) :: Easypost.Address.t
+  @spec create_address(map(), t) :: {:ok, t} | {:error, Easypost.Error.t}
   def create_address(conf, address) do  
-    body = Helpers.encode(%{"address" => address})
-    ctype = 'application/x-www-form-urlencoded'
-
-    case Requester.request(:post, Helpers.url(conf[:endpoint], "/addresses"), conf[:key], [], ctype, body) do
-      {:ok, address}->
-        {:ok, struct(Easypost.Address, address)}
-      {:error, _status, reason}->
-        {:error, struct(Easypost.Error, reason)}
+    params = %{"address" => address}
+    case Requester.post("/addresses", params, conf) do
+      {:ok, address} -> {:ok, struct(Easypost.Address, address)}
+      {:error, _status, reason} -> {:error, struct(Easypost.Error, reason)}
     end
   end
 
+  @spec create_and_verify_address(map(), t) :: {:ok, t, map()} | {:error, Easypost.Error.t}
+  def create_and_verify_address(conf, address) do
+    params = %{"address" => address, "verify[]" => "delivery"} 
+    case Requester.post("/addresses", params, conf) do
+      {:ok, response} ->
+        if response[:verifications][:delivery][:success] do
+          {:ok, struct(Easypost.Address, response), extract_details(response)}
+        else
+          reason = [
+            code: "ADDRESS.VERIFY.FAILURE",
+            errors: extract_errors(response),
+            message: "Unable to verify address."
+          ]
+          {:error, struct(Easypost.Error, reason)}
+        end
+      {:error, _status, reason} -> {:error, struct(Easypost.Error, reason)}
+    end
+  end
+
+  defp extract_details(response) do
+    response[:verifications][:delivery][:details]
+    |> Enum.into(%{})
+  end
+
+  defp extract_errors(response) do
+    response[:verifications][:delivery][:errors]
+  end
 end

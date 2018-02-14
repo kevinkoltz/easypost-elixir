@@ -24,6 +24,9 @@ defmodule Easypost.Client do
       #add an address by passing a binary key map (%{"foo" => "bar"})
       create_address(user.address)
 
+      # Create and verify an address
+      create_and_verify_address(user.address)
+
       #gets a list of rate quotes
       create_shipment(shipment)
 
@@ -42,6 +45,9 @@ defmodule Easypost.Client do
       def conf, do: unquote(config)
       def create_address(address) do
         unquote(Easypost.Address).create_address(conf(), address)
+      end
+      def create_and_verify_address(address) do
+        unquote(Easypost.Address).create_and_verify_address(conf(), address)
       end
       def create_parcel(parcel) do
         unquote(Easypost.Parcel).create_parcel(conf(), parcel)

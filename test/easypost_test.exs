@@ -6,6 +6,7 @@ defmodule EasypostTest do
 
   @validaddress1 %{"company" => "EasyPost", "street1" => "118 2nd Street", "street2" => "4th Floor", "city" => "San Francisco", "state" => "CA", "zip" => "94105", "phone" => "555-858-5555"}
   @validaddress2 %{"name" => "Dr. Steve Brule", "street1" => "179 N Harbor Dr", "city" => "Redondo Beach", "state" => "CA", "zip" => "90277", "phone" => "555-858-5555"}
+  @invalid_address %{"company" => "EasyPost", "street1" => "101 Fake Street", "street2" => "4th Floor", "city" => "Pleasantville", "state" => "CA", "zip" => "94105", "phone" => "555-1212"}
   @validparcel %{"length" => "20.2", "width" => "10.9", "height" => "5", "weight" => "65.9"}
   @validcustomsinfo %{"customs_certify" => "true", "customs_signer" => "Steve Brule", "contents_type" => "merchandise", "restriction_type" => "none", "customs_items" => [%{"description" => "Sweet shirts", "quantity" => "2", "value" => "23", "weight" => "11", "hs_tariff_number" => "654321", "origin_country" => "US"}]}
   @validcarrieraccount %{"type" => "UpsAccount", "description" => "NY Location UPS account", "reference" => "ups02", "credentials" => %{"account_number" => "A1A1A1", "user_id" => "USERID", "password" => "PASSWORD", "access_licence_number" => "ALN",}}
@@ -22,7 +23,7 @@ defmodule EasypostTest do
   end
 
   test "adding some valid address" do
-  	{_, address} = create_address(@validaddress1)
+    {_, address} = create_address(@validaddress1)
 
     assert address.__struct__ == Easypost.Address
   end
@@ -31,6 +32,36 @@ defmodule EasypostTest do
     {_, result} = create_address(%{})
     assert result.__struct__ == Easypost.Error
     assert result.code == "ADDRESS.PARAMETERS.INVALID"
+  end
+
+  test "create and verify with valid address" do
+    assert {
+      :ok,
+      %Easypost.Address{},
+      %{
+        latitude: 37.78768,
+        longitude: -122.39952,
+        time_zone: "America/Los_Angeles"
+      }
+    } = create_and_verify_address(@validaddress1)
+  end
+
+  test "create and verify with invalid address" do
+    assert {
+      :error,
+      %Easypost.Error{
+        code: "ADDRESS.VERIFY.FAILURE",
+        errors: [
+          [
+            code: "E.ADDRESS.NOT_FOUND",
+            field: "address",
+            message: "Address not found",
+            suggestion: nil
+          ]
+        ],
+        message: "Unable to verify address."
+      }
+    } = create_and_verify_address(@invalid_address)
   end
 
   test "adding a parcel" do

@@ -117,7 +117,8 @@ defmodule Easypost.Shipment do
     body = Helpers.encode(%{"shipment" => shipment})
     ctype = 'application/x-www-form-urlencoded'
 
-    case Requester.request(:post, Helpers.url(conf[:endpoint], "/shipments"), conf[:key], [], ctype, body) do
+    url = Helpers.url(conf[:endpoint], "/shipments")
+    case Requester.request(:post, url, conf[:key], [], ctype, body) do
       {:ok, shipment}->
         {:ok, struct(Easypost.Shipment, shipment)}
       {:error, _status, reason}->

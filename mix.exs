@@ -2,19 +2,21 @@ defmodule Easypost.Mixfile do
   use Mix.Project
 
   def project do
-    [app: :easypost,
-    version: "0.0.1",
-    elixir: "~> 1.0.0 or ~> 1.1",
-    deps: deps,
-    package: [
-      files: ["lib", "mix.exs", "README*", "LICENSE*"],
-      maintainers: ["Dania Simmons"],
-      licenses: ["MIT"],
-      links: %{github: "https://github.com/Dania02525/easypost"}
-    ],
-    description: """
-    Elixir Easypost Client
-    """]
+    [
+      app: :easypost,
+      version: "0.0.1",
+      elixir: "~> 1.5",
+      deps: deps(),
+      package: [
+        files: ["lib", "mix.exs", "README*", "LICENSE*"],
+        maintainers: ["Dania Simmons"],
+        licenses: ["MIT"],
+        links: %{github: "https://github.com/Dania02525/easypost"}
+      ],
+      description: """
+      Elixir Easypost Client
+      """
+    ]
   end
 
 # Configuration for the OTP application
@@ -27,9 +29,10 @@ defmodule Easypost.Mixfile do
 
   defp deps do
     [
-    {:poison, ">= 1.5.0"},
-    {:ex_doc, "~> 0.10", only: :dev},
-    {:earmark, ">= 0.0.0"}
+      {:poison, ">= 1.5.0"},
+      {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
+      {:ex_doc, "~> 0.10", only: :dev},
+      {:earmark, ">= 0.0.0"}
     ]
   end
 end

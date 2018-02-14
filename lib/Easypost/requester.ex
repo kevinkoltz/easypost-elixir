@@ -1,7 +1,15 @@
 defmodule Easypost.Requester do
+  alias Easypost.Helpers
+
+  def post(path, params, conf, headers \\ []) do
+    content_type = 'application/x-www-form-urlencoded'
+    body = Helpers.encode(params)
+    url = Helpers.url(conf[:endpoint], path)
+    request(:post, url, conf[:key], headers, content_type, body)
+  end
 
   def request(method, url, key, headers, ctype, body) do
-    url = String.to_char_list(url)
+    url = String.to_charlist(url)
     fetch = case method do
       :get ->
         headers = headers ++ [auth_header(key)]
@@ -20,7 +28,7 @@ defmodule Easypost.Requester do
   end
 
   defp auth_header(key) do
-  {'Authorization', 'Basic ' ++ String.to_char_list(Base.encode64(key <> ":"))}
+  {'Authorization', 'Basic ' ++ String.to_charlist(Base.encode64(key <> ":"))}
   end
 
   defp parse_response(response) do

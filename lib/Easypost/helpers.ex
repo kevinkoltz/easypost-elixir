@@ -11,7 +11,7 @@ defmodule Easypost.Helpers do
   end
 
   def encode(map) do
-    q = map
+    map
       |> Enum.map(fn({k,v})-> process(k, v) end)
       |> List.flatten
       |> URI.encode_query
