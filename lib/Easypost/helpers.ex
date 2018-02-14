@@ -1,6 +1,14 @@
 defmodule Easypost.Helpers do
 
-  def url(domain, path), do: Path.join([domain, path])
+  def url(domain, path) when is_binary(domain) and is_binary(path) do
+   Path.join([domain, path])
+  end
+  def url(domain, path) when is_binary(path) do
+    raise ArgumentError, "Invalid domain for URL: #{inspect(domain)}"
+  end
+  def url(domain, path) when is_binary(domain) do
+    raise ArgumentError, "Invalid path for URL: #{inspect(path)}"
+  end
 
   def encode(map) do
     q = map
